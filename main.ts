@@ -12,15 +12,19 @@ export default class MyPlugin extends Plugin {
 		            // If checking is true, we're simply "checking" if the command can be run.
 		            // If checking is false, then we want to actually perform the operation.
 		            if (!checking) {
+						// @ts-ignore
 		                const canvas = canvasView.canvas;
 						const selection = canvas.selection;
+						// @ts-ignore
 						const fileNodes = Array.from(selection).filter((node)=> node?.filePath !== undefined);
 						if(fileNodes.length === 0) return;
 
 						const resolvedLinks = app.metadataCache.resolvedLinks;
 						fileNodes.forEach((node)=> {
+							// @ts-ignore
 							const allLinks = (Object.keys(resolvedLinks[node.filePath]) as Array<string>);
 							for(let i = 0; i < fileNodes.length; i++) {
+								// @ts-ignore
 								if(allLinks.includes(fileNodes[i].filePath)) {
 									if(node !== fileNodes[i]) this.createEdge(node, fileNodes[i], canvas);
 								}
