@@ -1,6 +1,6 @@
 import { ItemView, Notice, Plugin } from 'obsidian';
 
-export default class MyPlugin extends Plugin {
+export default class LinkNodesInCanvas extends Plugin {
 	async onload() {
 		this.addCommand({
 		    id: 'link-between-selection-nodes',

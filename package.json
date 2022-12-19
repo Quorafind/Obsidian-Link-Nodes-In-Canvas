@@ -1,7 +1,7 @@
 {
-	"name": "canvas-link-them",
-	"version": "0.0.1",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"name": "link-nodes-in-canvas",
+	"version": "0.0.2",
+	"description": "A plugin for you to add edges between notes in Canvas based on their links.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
