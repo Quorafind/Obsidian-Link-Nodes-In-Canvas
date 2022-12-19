@@ -1,5 +1,5 @@
 {
-	"name": "obsidian-custom-plugin-starter",
+	"name": "canvas-link-them",
 	"version": "0.0.1",
 	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
