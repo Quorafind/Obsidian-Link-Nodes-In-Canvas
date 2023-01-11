@@ -207,7 +207,7 @@ class NodeSuggest extends EditorSuggest<AllCanvasNodeData> {
 		const results = this.nodes.filter((node) => {
 			switch (node.type) {
 				case "text":
-					if(node.text.toLowerCase().contains(this.lineContents) || node.text.trim() === "") return false;
+					if(node.id === this.original.id || node.text.trim() === "") return false;
 					return this.fuzzySearch(node.text.toLowerCase());
 				case "file":
 					return this.fuzzySearch(node.file.toLowerCase());
