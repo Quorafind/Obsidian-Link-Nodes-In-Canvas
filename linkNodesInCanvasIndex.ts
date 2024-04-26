@@ -1,4 +1,5 @@
 import {
+	debounce,
 	Editor,
 	EditorPosition,
 	EditorSuggest,
@@ -9,13 +10,17 @@ import {
 	Plugin, prepareFuzzySearch, setIcon,
 	TFile
 } from 'obsidian';
-import { AllCanvasNodeData, CanvasTextData, NodeSide } from "./canvas";
+import { AllCanvasNodeData, NodeSide } from "./canvas";
 import { CanvasEdgeData } from "obsidian/canvas";
+import { around } from "monkey-around";
 
 export default class LinkNodesInCanvas extends Plugin {
+	public patchedEdge: boolean;
+
 	async onload() {
 		this.registerCustomCommands();
 		this.registerCustomSuggester();
+		this.registerCanvasAutoLink();
 	}
 
 	registerCustomCommands() {
@@ -74,6 +79,135 @@ export default class LinkNodesInCanvas extends Plugin {
 
 	registerCustomSuggester() {
 		this.registerEditorSuggest(new NodeSuggest(this));
+	}
+
+	registerCanvasAutoLink() {
+		const updateTargetNode = debounce(async (e: any) => {
+			if (!e.to.node.filePath) return;
+
+			console.log(e);
+
+			if (!e.from.node?.filePath && !Object.hasOwn(e.from.node, 'text')) return;
+
+			const file = this.app.vault.getFileByPath(e.to.node.filePath);
+			if (!file) return;
+
+			const link = this.app.fileManager.generateMarkdownLink(file, e.canvas.view.file.path);
+
+			if (e.from.node.filePath) {
+				const fromFile = this.app.vault.getFileByPath(e.from.node.filePath);
+				if (!fromFile) return;
+
+				const content = await this.app.vault.cachedRead(fromFile);
+				await this.app.vault.append(fromFile, `\n${link}`);
+			} else {
+				const fromNode = e.from.node;
+				fromNode.setText(`${fromNode.text}\n${link}`);
+
+				console.log(fromNode);
+
+				e.canvas.requestSave();
+			}
+		}, 1000);
+
+		const updateOriginalNode = debounce(async (canvas: any, edge: any) => {
+			if (!edge.to.node.filePath) return;
+			if (!edge.from.node?.filePath && !Object.hasOwn(edge.from.node, 'text')) return;
+
+			const toNode = edge.to.node;
+			const fromNode = edge.from.node;
+			const file = this.app.vault.getFileByPath(toNode.filePath);
+			if (!file) return;
+			const link = this.app.fileManager.generateMarkdownLink(file, edge.to.node.filePath);
+
+			if (fromNode?.filePath) {
+				const fromFile = this.app.vault.getFileByPath(fromNode.filePath);
+				if (!fromFile) return;
+				const content = await this.app.vault.cachedRead(fromFile);
+				const newContent = content.replaceAll(link, '');
+				await this.app.vault.modify(file, newContent);
+			} else {
+				const fromNode = edge.from.node;
+				fromNode.setText((fromNode.text as string).replaceAll(link, ''));
+
+				canvas.requestSave();
+			}
+		}, 500);
+
+		const selfPatched = (edge: any) => {
+			this.patchedEdge = true;
+
+			console.log(edge);
+
+			around(edge.constructor.prototype, {
+				update: (next: any) => {
+					return function (...args: any[]) {
+						const result = next.call(this, ...args);
+						updateTargetNode(this);
+						return result;
+					};
+				}
+			});
+		};
+
+		const self = this;
+
+		const patchCanvas = () => {
+			const canvasView = this.app.workspace.getLeavesOfType('canvas')[0]?.view;
+
+			if (!canvasView) return false;
+
+			// @ts-ignore
+			const canvas = canvasView.canvas;
+			if (!canvas) return false;
+
+			const edge = canvas.edges.values().next().value;
+			if (edge) {
+				this.patchedEdge = true;
+				selfPatched(edge);
+
+				around(canvas.constructor.prototype, {
+					removeEdge: (next: any) => {
+						return function (edge: any) {
+							const result = next.call(this, edge);
+							updateOriginalNode(this, edge);
+							return result;
+						};
+					}
+				});
+				return true;
+			}
+
+			around(canvas.constructor.prototype, {
+				addEdge: (next: any) => {
+					return function (edge: any) {
+						const result = next.call(this, edge);
+						if (!self.patchedEdge) {
+							selfPatched(edge);
+						}
+						return result;
+					};
+				},
+				deleteEdge: (next: any) => {
+					return function (edge: any) {
+						const result = next.call(this, edge);
+						updateOriginalNode(this, edge);
+						return result;
+					};
+				}
+			});
+
+			console.log('Canvas patched');
+		};
+
+		this.app.workspace.onLayoutReady(() => {
+			if (!patchCanvas()) {
+				const evt = this.app.workspace.on("layout-change", () => {
+					patchCanvas() && this.app.workspace.offref(evt);
+				});
+				this.registerEvent(evt);
+			}
+		});
 	}
 
 	createEdge(node1: any, node2: any) {

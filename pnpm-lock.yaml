@@ -20,6 +20,9 @@ devDependencies:
   esbuild:
     specifier: 0.14.47
     version: 0.14.47
+  monkey-around:
+    specifier: ^3.0.0
+    version: 3.0.0
   obsidian:
     specifier: 1.5.7-1
     version: 1.5.7-1(@codemirror/state@6.4.1)(@codemirror/view@6.26.3)
@@ -1006,6 +1009,10 @@ packages:
 
   /moment@2.29.4:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
+    dev: true
+
+  /monkey-around@3.0.0:
+    resolution: {integrity: sha512-jL6uY2lEAoaHxZep1cNRkCZjoIWY4g5VYCjriEWmcyHU7w8NU1+JH57xE251UVTohK0lCxMjv0ZV4ByDLIXEpw==}
     dev: true
 
   /ms@2.1.2:
