@@ -84,9 +84,6 @@ export default class LinkNodesInCanvas extends Plugin {
 	registerCanvasAutoLink() {
 		const updateTargetNode = debounce(async (e: any) => {
 			if (!e.to.node.filePath) return;
-
-			console.log(e);
-
 			if (!e.from.node?.filePath && !Object.hasOwn(e.from.node, 'text')) return;
 
 			const file = this.app.vault.getFileByPath(e.to.node.filePath);
@@ -103,8 +100,6 @@ export default class LinkNodesInCanvas extends Plugin {
 			} else {
 				const fromNode = e.from.node;
 				fromNode.setText(`${fromNode.text}\n${link}`);
-
-				console.log(fromNode);
 
 				e.canvas.requestSave();
 			}
@@ -136,8 +131,6 @@ export default class LinkNodesInCanvas extends Plugin {
 
 		const selfPatched = (edge: any) => {
 			this.patchedEdge = true;
-
-			console.log(edge);
 
 			around(edge.constructor.prototype, {
 				update: (next: any) => {
