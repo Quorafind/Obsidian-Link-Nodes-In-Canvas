@@ -2,6 +2,26 @@
 
 - Use command to generate edges between nodes(selected) in canvas.
 
+## Detail usage
+
+### Command to generate links
+
+- You can drop two files in to a canvas
+- Select the two nodes
+- Use command `Link Nodes In Canvas` to generate an edge between the two nodes.
+	- The edge means the `[[]]` link between the two nodes(cards).
+
+### Drag and link
+
+- You can just link to a node from a text/file node;
+- An edge will be generated between the two nodes.
+- And then a markdown link will be created in the text/file node.
+
+### Delete the link
+
+- You can delete the edge by selecting the edge and use `Delete` key.
+- When you delete the edge, the markdown link in the text/file node will be deleted.
+
 ## Showcase
 
 ![showcase](https://raw.githubusercontent.com/Quorafind/obsidian-link-nodes-in-canvas/master/LinkNodes.gif)
