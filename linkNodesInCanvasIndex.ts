@@ -32,6 +32,7 @@ export default class LinkNodesInCanvas extends Plugin {
 						// @ts-ignore
 						const canvas = canvasView.canvas;
 						const selection = canvas.selection;
+						const currentData = canvas.getData();
 						// @ts-ignore
 						const fileNodes = Array.from(selection).filter((node) => node?.filePath !== undefined);
 						if (fileNodes.length === 0) return;
@@ -45,14 +46,16 @@ export default class LinkNodesInCanvas extends Plugin {
 								// @ts-ignore
 								if (allLinks.includes(fileNodes[i].filePath)) {
 									if (node !== fileNodes[i]) {
-										const newEdge = this.createEdge(node, fileNodes[i], canvas);
+										const newEdge = this.createEdge(node, fileNodes[i]);
+										if (currentData.edges.some((edge: CanvasEdgeData) => {
+											return edge.fromNode === newEdge.fromNode && edge.toNode === newEdge.toNode;
+										})) continue;
 										allEdgesData.push(newEdge);
 									}
 								}
 							}
 						});
 
-						const currentData = canvas.getData();
 						currentData.edges = [
 							...currentData.edges,
 							...allEdgesData,
@@ -73,7 +76,7 @@ export default class LinkNodesInCanvas extends Plugin {
 		this.registerEditorSuggest(new NodeSuggest(this));
 	}
 
-	createEdge(node1: any, node2: any, canvas: any) {
+	createEdge(node1: any, node2: any) {
 		const random = (e: number) => {
 			let t = [];
 			for (let n = 0; n < e; n++) {
