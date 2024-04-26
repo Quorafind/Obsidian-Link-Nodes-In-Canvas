@@ -1,6 +1,6 @@
 {
 	"name": "link-nodes-in-canvas",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A plugin for you to add edges between notes in Canvas based on their links.",
 	"main": "main.js",
 	"scripts": {

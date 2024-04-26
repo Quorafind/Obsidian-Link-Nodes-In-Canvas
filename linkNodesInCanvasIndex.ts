@@ -105,7 +105,7 @@ export default class LinkNodesInCanvas extends Plugin {
 			}
 		}, 1000);
 
-		const updateOriginalNode = debounce(async (canvas: any, edge: any) => {
+		const updateOriginalNode = async (canvas: any, edge: any) => {
 			if (!edge.to.node.filePath) return;
 			if (!edge.from.node?.filePath && !Object.hasOwn(edge.from.node, 'text')) return;
 
@@ -118,16 +118,16 @@ export default class LinkNodesInCanvas extends Plugin {
 			if (fromNode?.filePath) {
 				const fromFile = this.app.vault.getFileByPath(fromNode.filePath);
 				if (!fromFile) return;
-				const content = await this.app.vault.cachedRead(fromFile);
+				const content = await this.app.vault.read(fromFile);
 				const newContent = content.replaceAll(link, '');
-				await this.app.vault.modify(file, newContent);
+				await this.app.vault.modify(fromFile, newContent);
 			} else {
 				const fromNode = edge.from.node;
 				fromNode.setText((fromNode.text as string).replaceAll(link, ''));
 
 				canvas.requestSave();
 			}
-		}, 500);
+		};
 
 		const selfPatched = (edge: any) => {
 			this.patchedEdge = true;
